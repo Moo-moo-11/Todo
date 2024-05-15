@@ -10,6 +10,7 @@ import moomoo.todo.domain.todos.repository.TodoRepository
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TodoServiceImpl(
@@ -26,6 +27,7 @@ class TodoServiceImpl(
         return todo.toResponse()
     }
 
+    @Transactional
     override fun createTodo(request: CreateTodoRequest): TodoResponse {
         val todo = Todo(
             title = request.title,
@@ -36,6 +38,7 @@ class TodoServiceImpl(
         return todoRepository.save(todo).toResponse()
     }
 
+    @Transactional
     override fun updateTodo(todoId: Long, request: UpdateTodoRequest): TodoResponse {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw TodoNotFoundException(todoId)
         todo.title = request.title
@@ -44,6 +47,7 @@ class TodoServiceImpl(
         return todoRepository.save(todo).toResponse()
     }
 
+    @Transactional
     override fun deleteTodoById(todoId: Long) {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw TodoNotFoundException(todoId)
         todoRepository.delete(todo)
