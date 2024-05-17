@@ -17,7 +17,7 @@ class TodoController(
     fun getTodoList(): ResponseEntity<List<TodoResponse>> {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(todoService.getAllTodos())
+            .body(todoService.getAllTodoList())
     }
 
     @GetMapping("/{todoId}")
@@ -43,9 +43,16 @@ class TodoController(
 
     @DeleteMapping("/{todoId}")
     fun deleteTodo(@PathVariable todoId: Long): ResponseEntity<Unit> {
-        todoService.deleteTodoById(todoId)
+        todoService.deleteTodo(todoId)
         return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
+            .status(HttpStatus.NO_CONTENT)
             .build()
+    }
+
+    @PatchMapping("/{todoId}")
+    fun completeTodo(@PathVariable todoId: Long): ResponseEntity<TodoResponse> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(todoService.completeOrUncompleteTodo(todoId))
     }
 }
