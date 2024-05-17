@@ -8,7 +8,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 
 @EntityListeners(AuditingEntityListener::class)
 @Entity (name = "todo2")
