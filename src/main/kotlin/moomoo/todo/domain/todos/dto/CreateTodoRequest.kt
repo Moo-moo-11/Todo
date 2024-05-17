@@ -5,6 +5,5 @@ import java.util.Date
 data class CreateTodoRequest(
     val title: String,
     val name: String,
-    val description: String?,
-    val date: Date
+    val description: String?
 )
