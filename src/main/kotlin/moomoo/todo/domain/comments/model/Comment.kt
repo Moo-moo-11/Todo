@@ -34,7 +34,7 @@ class Comment(
 
     @CreatedDate
     @Column(updatable = false)
-    var createdAt: LocalDateTime? = null
+    var createdAt: LocalDateTime = LocalDateTime.now()
 
     fun isValidPassword(requestWriter: String, requestPassword: String) : Boolean{
         return password == requestPassword && writer == requestWriter
@@ -50,6 +50,6 @@ fun Comment.toResponse() : CommentResponse {
         id = id!!,
         writer = writer,
         comment = comment,
-        createdDateTime = createdAt!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul")))
+        createdDateTime = createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul")))
     )
 }

@@ -32,10 +32,10 @@ class Todo(
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
-    var createdAt: LocalDateTime? = null
+    var createdAt: LocalDateTime = LocalDateTime.now()
 
     @LastModifiedDate
-    var updatedAt: LocalDateTime? = null
+    var updatedAt: LocalDateTime = LocalDateTime.now()
 
     fun toggleTodo() {
         isCompleted = !isCompleted
@@ -56,7 +56,7 @@ fun Todo.toResponse(): TodoResponse {
         writer = writer,
         description = description,
         isCompleted = isCompleted,
-        createdDateTime = createdAt!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul"))),
-        lastUpdatedDateTime = updatedAt!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul")))
+        createdDateTime = createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul"))),
+        lastUpdatedDateTime = updatedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul")))
     )
 }
