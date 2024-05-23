@@ -2,7 +2,6 @@ package moomoo.todo.domain.todos.model
 
 import jakarta.persistence.*
 import moomoo.todo.domain.todos.dto.TodoResponse
-import moomoo.todo.domain.todos.dto.UpdateTodoRequest
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -18,10 +17,10 @@ class Todo(
     var title: String,
 
     @Column
-    var writer: String,
+    var name: String,
 
     @Column
-    var description: String,
+    var description: String?,
 
     @Column (name = "is_completed")
     var isCompleted: Boolean = false
@@ -37,23 +36,13 @@ class Todo(
     @LastModifiedDate
     var updatedAt: LocalDateTime? = null
 
-    fun toggleTodo() {
-        isCompleted = !isCompleted
-    }
-
-    fun updateTodo(request: UpdateTodoRequest) {
-        title = request.title
-        writer = request.writer
-        description = request.description
-    }
-
 }
 
 fun Todo.toResponse(): TodoResponse {
     return TodoResponse(
         id = id!!,
         title = title,
-        writer = writer,
+        name = name,
         description = description,
         isCompleted = isCompleted,
         createdDateTime = createdAt!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul"))),
