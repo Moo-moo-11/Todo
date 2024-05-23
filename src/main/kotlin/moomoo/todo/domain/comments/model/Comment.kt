@@ -2,6 +2,7 @@ package moomoo.todo.domain.comments.model
 
 import jakarta.persistence.*
 import moomoo.todo.domain.comments.dto.CommentResponse
+import moomoo.todo.domain.comments.dto.UpdateCommentRequest
 import moomoo.todo.domain.todos.model.Todo
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -15,7 +16,7 @@ import java.time.format.DateTimeFormatter
 class Comment(
 
     @Column
-    var name: String,
+    val writer: String,
 
     @Column
     var comment: String,
@@ -23,7 +24,7 @@ class Comment(
     @Column
     val password: String,
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "todo_id")
     var todo: Todo
 
@@ -32,18 +33,22 @@ class Comment(
     var id: Long? = null
 
     @CreatedDate
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false)
     var createdAt: LocalDateTime? = null
 
-    fun isValidPassword(requestPassword: String) : Boolean{
-        return password == requestPassword
+    fun isValidPassword(requestWriter: String, requestPassword: String) : Boolean{
+        return password == requestPassword && writer == requestWriter
+    }
+
+    fun updateComment(request: UpdateCommentRequest){
+        comment = request.comment
     }
 }
 
 fun Comment.toResponse() : CommentResponse {
     return CommentResponse(
         id = id!!,
-        name = name,
+        writer = writer,
         comment = comment,
         createdDateTime = createdAt!!.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul")))
     )
