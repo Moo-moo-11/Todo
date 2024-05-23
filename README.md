@@ -146,7 +146,7 @@
 
 <strong>ERD</strong>
 
-![Picture](erd_pic.png)
+![Picture](erd.png)
 
 <br/>
 
