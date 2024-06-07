@@ -51,9 +51,9 @@ class TodoController(
     }
 
     @PatchMapping("/{todoId}")
-    fun completeTodo(@PathVariable todoId: Long): ResponseEntity<TodoResponse> {
+    fun toggleTodo(@PathVariable todoId: Long): ResponseEntity<TodoResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(todoService.completeOrUncompleteTodo(todoId))
+            .body(todoService.toggleTodo(todoId))
     }
 }

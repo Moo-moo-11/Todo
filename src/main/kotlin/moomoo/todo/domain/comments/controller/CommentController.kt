@@ -4,7 +4,7 @@ import moomoo.todo.domain.comments.dto.CommentResponse
 import moomoo.todo.domain.comments.dto.CreateCommentRequest
 import moomoo.todo.domain.comments.dto.DeleteCommentRequest
 import moomoo.todo.domain.comments.dto.UpdateCommentRequest
-import moomoo.todo.domain.todos.service.TodoServiceImpl
+import moomoo.todo.domain.todos.service.TodoService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/todos/{todoId}/comments")
 @RestController
 class CommentController(
-    val todoService: TodoServiceImpl
+    val todoService: TodoService
 ) {
 
     @GetMapping()
