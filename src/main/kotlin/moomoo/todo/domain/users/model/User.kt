@@ -19,7 +19,7 @@ class User(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    var role: Role
+    var role: Role = Role.USER
 ) {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
