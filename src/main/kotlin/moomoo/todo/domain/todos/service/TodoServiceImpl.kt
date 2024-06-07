@@ -66,22 +66,22 @@ class TodoServiceImpl(
     }
 
     @Transactional
-    override fun completeOrUncompleteTodo(todoId: Long): TodoResponse {
+    override fun toggleTodo(todoId: Long): TodoResponse {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
 
-        todo.isCompleted = !todo.isCompleted
+        todo.toggleTodo()
 
-        return todoRepository.save(todo).toResponse()
+        return todo.toResponse()
     }
 
     override fun getCommentList(todoId: Long): List<CommentResponse> {
-        todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
+        if(!todoRepository.existsById(todoId)) throw ModelNotFoundException("Todo", todoId)
 
         return commentRepository.findAllByTodoIdOrderByCreatedAt(todoId).map { it.toResponse() }
     }
 
     override fun getComment(todoId: Long, commentId: Long): CommentResponse {
-        todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
+        if(!todoRepository.existsById(todoId)) throw ModelNotFoundException("Todo", todoId)
 
         val comment = commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
 
@@ -104,21 +104,20 @@ class TodoServiceImpl(
 
     @Transactional
     override fun updateComment(todoId: Long, commentId: Long, request: UpdateCommentRequest): CommentResponse {
-        todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
+        if(!todoRepository.existsById(todoId)) throw ModelNotFoundException("Todo", todoId)
 
         val comment = commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
 
         if (!comment.isValidPassword(request.password)) throw PasswordNotMatchedException()
 
-        comment.name = request.name
-        comment.comment = request.comment
+        comment.updateComment(request.name, request.comment)
 
-        return commentRepository.save(comment).toResponse()
+        return comment.toResponse()
     }
 
     @Transactional
     override fun deleteComment(todoId: Long, commentId: Long, request: DeleteCommentRequest) {
-        todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
+        if(!todoRepository.existsById(todoId)) throw ModelNotFoundException("Todo", todoId)
 
         val comment = commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
 

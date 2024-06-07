@@ -38,6 +38,11 @@ class Comment(
     fun isValidPassword(requestPassword: String) : Boolean{
         return password == requestPassword
     }
+
+    fun updateComment(name:String, comment: String) {
+        this.name = name
+        this.comment = comment
+    }
 }
 
 fun Comment.toResponse() : CommentResponse {

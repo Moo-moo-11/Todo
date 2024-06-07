@@ -41,6 +41,10 @@ class Todo(
         this.description = description
     }
 
+    fun toggleTodo() {
+        isCompleted = !isCompleted
+    }
+
 }
 
 fun Todo.toResponse(): TodoResponse {

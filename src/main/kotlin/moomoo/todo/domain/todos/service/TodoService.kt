@@ -18,7 +18,7 @@ interface TodoService {
 
     fun deleteTodo(todoId: Long)
 
-    fun completeOrUncompleteTodo(todoId: Long) : TodoResponse
+    fun toggleTodo(todoId: Long) : TodoResponse
 
     fun getCommentList(todoId: Long): List<CommentResponse>
 
