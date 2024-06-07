@@ -8,11 +8,12 @@ import moomoo.todo.domain.exception.ModelNotFoundException
 import moomoo.todo.domain.exception.PasswordNotMatchedException
 import moomoo.todo.domain.todos.dto.CreateTodoRequest
 import moomoo.todo.domain.todos.dto.TodoResponse
+import moomoo.todo.domain.todos.dto.TodoResponseWithCommentList
 import moomoo.todo.domain.todos.dto.UpdateTodoRequest
 import moomoo.todo.domain.todos.model.Todo
 import moomoo.todo.domain.todos.model.toResponse
+import moomoo.todo.domain.todos.model.toResponseWithCommentList
 import moomoo.todo.domain.todos.repository.TodoRepository
-import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,13 +25,15 @@ class TodoServiceImpl(
 ): TodoService {
 
     override fun getAllTodoList(): List<TodoResponse> {
-        return todoRepository.findAll(Sort.by(Sort.Direction.DESC,"createdAt")).map { it.toResponse() }
+        return todoRepository.findAllByOrderByCreatedAtDesc().map { it.toResponse() }
     }
 
-    override fun getTodoById(todoId: Long): TodoResponse {
+    override fun getTodoById(todoId: Long): TodoResponseWithCommentList {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
 
-        return todo.toResponse()
+        val commentList = commentRepository.findAllByTodoIdOrderByCreatedAt(todoId)
+
+        return todo.toResponseWithCommentList(commentList)
     }
 
     @Transactional
@@ -48,11 +51,7 @@ class TodoServiceImpl(
     override fun updateTodo(todoId: Long, request: UpdateTodoRequest): TodoResponse {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
 
-        todo.title = request.title
-        todo.name = request.name
-        todo.description = request.description
-
-        todoRepository.flush()
+        todo.updateTodo(request.title, request.name, request.description)
 
         return todo.toResponse()
     }
@@ -78,7 +77,7 @@ class TodoServiceImpl(
     override fun getCommentList(todoId: Long): List<CommentResponse> {
         todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
 
-        return commentRepository.findAllByTodoId(todoId).sortedBy { it.createdAt }.map { it.toResponse() }
+        return commentRepository.findAllByTodoIdOrderByCreatedAt(todoId).map { it.toResponse() }
     }
 
     override fun getComment(todoId: Long, commentId: Long): CommentResponse {

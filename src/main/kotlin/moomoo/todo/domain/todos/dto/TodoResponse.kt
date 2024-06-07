@@ -6,6 +6,5 @@ data class TodoResponse(
     val name: String,
     val description: String?,
     val isCompleted: Boolean,
-    val createdDateTime: String,
-    val lastUpdatedDateTime: String
+    val createdAt: String
 )

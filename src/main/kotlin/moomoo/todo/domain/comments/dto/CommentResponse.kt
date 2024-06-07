@@ -4,5 +4,5 @@ data class CommentResponse(
     val id: Long,
     val name: String,
     val comment: String,
-    val createdDateTime: String
+    val createdAt: String
 )
