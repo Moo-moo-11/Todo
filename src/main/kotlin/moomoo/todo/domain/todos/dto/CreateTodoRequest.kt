@@ -1,7 +1,7 @@
 package moomoo.todo.domain.todos.dto
 
 data class CreateTodoRequest(
+    val userId: Long,
     val title: String,
-    val name: String,
     val description: String?
 )

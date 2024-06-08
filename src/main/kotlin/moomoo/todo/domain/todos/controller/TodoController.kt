@@ -7,6 +7,7 @@ import moomoo.todo.domain.todos.dto.UpdateTodoRequest
 import moomoo.todo.domain.todos.service.TodoService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("/todos")
@@ -29,6 +30,7 @@ class TodoController(
     }
 
     @PostMapping()
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     fun createTodo(@RequestBody request: CreateTodoRequest): ResponseEntity<TodoResponse> {
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -36,6 +38,7 @@ class TodoController(
     }
 
     @PutMapping("/{todoId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     fun updateTodo(@PathVariable todoId: Long, @RequestBody request: UpdateTodoRequest): ResponseEntity<TodoResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -43,6 +46,7 @@ class TodoController(
     }
 
     @DeleteMapping("/{todoId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     fun deleteTodo(@PathVariable todoId: Long): ResponseEntity<Unit> {
         todoService.deleteTodo(todoId)
         return ResponseEntity
@@ -51,6 +55,7 @@ class TodoController(
     }
 
     @PatchMapping("/{todoId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     fun toggleTodo(@PathVariable todoId: Long): ResponseEntity<TodoResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)

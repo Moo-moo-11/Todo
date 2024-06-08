@@ -1,4 +1,4 @@
-package moomoo.todo.infra.swagger.security.jwt
+package moomoo.todo.infra.security.jwt
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

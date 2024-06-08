@@ -4,29 +4,37 @@ import moomoo.todo.domain.users.dto.*
 import moomoo.todo.domain.users.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
-@RequestMapping("/users")
 @RestController
 class UserController(
     val userService: UserService
 ) {
-    @GetMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
-        TODO()
-    }
-
-    @GetMapping("/{userId}")
-    fun getUser(@PathVariable userId: Long): ResponseEntity<UserResponse> {
-        TODO()
-    }
-
-    @PostMapping("/singup")
+    @PostMapping("/signup")
     fun signUp(@RequestBody signUpRequest: SignUpRequest): ResponseEntity<UserResponse> {
-        TODO()
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(userService.signUp(signUpRequest))
     }
 
-    @PutMapping("/{userId}")
+    @PostMapping("/login")
+    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.login(loginRequest))
+    }
+
+    @GetMapping("/users/{userId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    fun getUser(@PathVariable userId: Long): ResponseEntity<UserResponse> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userService.getUser(userId))
+    }
+
+    @PutMapping("/users/{userId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     fun updateAddress(@PathVariable userId: Long, @RequestBody updateAddressRequest: UpdateAddressRequest): ResponseEntity<UserResponse> {
         return ResponseEntity
             .status(HttpStatus.OK)

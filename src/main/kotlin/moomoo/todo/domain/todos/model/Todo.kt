@@ -5,6 +5,7 @@ import moomoo.todo.domain.comments.model.Comment
 import moomoo.todo.domain.comments.model.toResponse
 import moomoo.todo.domain.todos.dto.TodoResponse
 import moomoo.todo.domain.todos.dto.TodoResponseWithCommentList
+import moomoo.todo.domain.users.model.User
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
@@ -15,17 +16,18 @@ import java.time.format.DateTimeFormatter
 @Entity (name = "todo")
 class Todo(
 
-    @Column
+    @Column(name = "title", nullable = false)
     var title: String,
 
-    @Column
-    var name: String,
-
-    @Column
+    @Column(name = "description")
     var description: String?,
 
-    @Column (name = "is_completed")
-    var isCompleted: Boolean = false
+    @Column (name = "is_completed", nullable = false)
+    var isCompleted: Boolean = false,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    var user: User
 
 ) {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +37,8 @@ class Todo(
     @Column(updatable = false, nullable = false)
     var createdAt: LocalDateTime = LocalDateTime.now()
 
-    fun updateTodo(title: String, name: String, description: String?) {
+    fun updateTodo(title: String, description: String?) {
         this.title = title
-        this.name = name
         this.description = description
     }
 
@@ -51,7 +52,7 @@ fun Todo.toResponse(): TodoResponse {
     return TodoResponse(
         id = id!!,
         title = title,
-        name = name,
+        name = user.name,
         description = description,
         isCompleted = isCompleted,
         createdAt = createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul")))
@@ -62,7 +63,7 @@ fun Todo.toResponseWithCommentList(commentList: List<Comment>): TodoResponseWith
     return TodoResponseWithCommentList(
         id = id!!,
         title = title,
-        name = name,
+        name = user.name,
         description = description,
         isCompleted = isCompleted,
         createdAt = createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul"))),

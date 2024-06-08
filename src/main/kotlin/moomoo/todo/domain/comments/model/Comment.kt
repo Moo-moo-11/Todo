@@ -3,6 +3,7 @@ package moomoo.todo.domain.comments.model
 import jakarta.persistence.*
 import moomoo.todo.domain.comments.dto.CommentResponse
 import moomoo.todo.domain.todos.model.Todo
+import moomoo.todo.domain.users.model.User
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
@@ -13,17 +14,14 @@ import java.time.format.DateTimeFormatter
 @Entity
 @Table(name = "comment")
 class Comment(
-
-    @Column
-    var name: String,
-
-    @Column
+    @Column(name = "comment", nullable = false)
     var comment: String,
 
-    @Column
-    val password: String,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    var user: User,
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "todo_id")
     var todo: Todo
 
@@ -35,12 +33,7 @@ class Comment(
     @Column(updatable = false, nullable = false)
     var createdAt: LocalDateTime = LocalDateTime.now()
 
-    fun isValidPassword(requestPassword: String) : Boolean{
-        return password == requestPassword
-    }
-
-    fun updateComment(name:String, comment: String) {
-        this.name = name
+    fun updateComment(comment: String) {
         this.comment = comment
     }
 }
@@ -48,7 +41,7 @@ class Comment(
 fun Comment.toResponse() : CommentResponse {
     return CommentResponse(
         id = id!!,
-        name = name,
+        name = user.name,
         comment = comment,
         createdAt = createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Seoul")))
     )

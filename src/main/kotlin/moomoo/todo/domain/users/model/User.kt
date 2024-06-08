@@ -15,7 +15,7 @@ class User(
     val password: String,
 
     @Embedded
-    var address: Address? = null,
+    var address: Address,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
@@ -23,6 +23,10 @@ class User(
 ) {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
+
+    fun updateAddress(zipcode: String?, streetNameAddress: String?, detailedAddress: String?) {
+        address = Address(zipcode, streetNameAddress, detailedAddress)
+    }
 }
 
 fun User.toResponse(): UserResponse {
@@ -30,9 +34,9 @@ fun User.toResponse(): UserResponse {
         id = id!!,
         userIdentifier = userIdentifier,
         name = name,
-        zipCode = address?.zipCode,
-        streetNameAddress = address?.streetNameAddress,
-        detailedAddress = address?.detailedAddress,
+        zipCode = address.zipCode,
+        streetNameAddress = address.streetNameAddress,
+        detailedAddress = address.detailedAddress,
         role = role.name
     )
 }

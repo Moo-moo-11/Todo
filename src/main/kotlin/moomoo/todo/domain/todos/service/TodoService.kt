@@ -28,6 +28,6 @@ interface TodoService {
 
     fun updateComment(todoId: Long, commentId: Long, request: UpdateCommentRequest) : CommentResponse
 
-    fun deleteComment(todoId: Long, commentId: Long, request: DeleteCommentRequest)
+    fun deleteComment(todoId: Long, commentId: Long)
 
 }

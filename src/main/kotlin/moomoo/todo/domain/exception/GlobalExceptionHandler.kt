@@ -22,4 +22,39 @@ class GlobalExceptionHandler {
             .status(HttpStatus.UNAUTHORIZED)
             .body(ErrorResponse(e.message))
     }
+
+    @ExceptionHandler(UserIdentifierAlreadyExistsException::class)
+    fun handleUserIdentifierAlreadyExists(e: UserIdentifierAlreadyExistsException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse(e.message))
+    }
+
+    @ExceptionHandler(InvalidUserRoleException::class)
+    fun handleInValidUserRoleException(e: InvalidUserRoleException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse(e.message))
+    }
+
+    @ExceptionHandler(InvalidCredentialException::class)
+    fun handleInvalidCredentialException(e: InvalidCredentialException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse(e.message))
+    }
+
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handleUserNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(ErrorResponse(e.message))
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException::class)
+    fun handleUnauthorizedAccessException(e: UnauthorizedAccessException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(ErrorResponse(e.message))
+    }
 }

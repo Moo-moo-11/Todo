@@ -1,4 +1,4 @@
-package moomoo.todo.infra.swagger.security.jwt
+package moomoo.todo.infra.security.jwt
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jws
@@ -13,10 +13,11 @@ import java.util.*
 class JwtPlugin(
     private val jwtProperties: JwtProperties
 ){
+    private val key = Keys.hmacShaKeyFor(jwtProperties.secret.toByteArray(Charsets.UTF_8))
+
     fun validateToken(jwt: String) : Result<Jws<Claims>> {
         return kotlin.runCatching {
-            Jwts.parser().verifyWith(Keys.hmacShaKeyFor(jwtProperties.secret.toByteArray(Charsets.UTF_8)))
-                .build().parseSignedClaims(jwt)
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(jwt)
         }
     }
 
@@ -31,7 +32,7 @@ class JwtPlugin(
             .claims(mapOf("userIdentifier" to userIdentifier, "role" to role))
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plus(expirationHour)))
-            .signWith(Keys.hmacShaKeyFor(jwtProperties.secret.toByteArray(Charsets.UTF_8)))
+            .signWith(key)
             .compact()
     }
 }
