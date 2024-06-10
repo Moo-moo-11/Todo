@@ -2,17 +2,17 @@ package moomoo.todo.domain.comments.controller
 
 import moomoo.todo.domain.comments.dto.CommentResponse
 import moomoo.todo.domain.comments.dto.CreateCommentRequest
-import moomoo.todo.domain.comments.dto.DeleteCommentRequest
 import moomoo.todo.domain.comments.dto.UpdateCommentRequest
-import moomoo.todo.domain.todos.service.TodoServiceImpl
+import moomoo.todo.domain.todos.service.TodoService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("/todos/{todoId}/comments")
 @RestController
 class CommentController(
-    val todoService: TodoServiceImpl
+    val todoService: TodoService
 ) {
 
     @GetMapping()
@@ -30,6 +30,7 @@ class CommentController(
     }
 
     @PostMapping()
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     fun createComment(@PathVariable todoId: Long, @RequestBody request: CreateCommentRequest): ResponseEntity<CommentResponse> {
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -37,6 +38,7 @@ class CommentController(
     }
 
     @PutMapping("/{commentId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     fun updateComment(@PathVariable todoId: Long, @PathVariable commentId: Long,
                       @RequestBody request: UpdateCommentRequest): ResponseEntity<CommentResponse> {
         return ResponseEntity
@@ -46,9 +48,9 @@ class CommentController(
     }
 
     @DeleteMapping("/{commentId}")
-    fun deleteComment(@PathVariable todoId: Long, @PathVariable commentId: Long,
-                      @RequestBody request: DeleteCommentRequest): ResponseEntity<Unit> {
-        todoService.deleteComment(todoId, commentId, request)
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    fun deleteComment(@PathVariable todoId: Long, @PathVariable commentId: Long): ResponseEntity<Unit> {
+        todoService.deleteComment(todoId, commentId)
         return ResponseEntity
             .status(HttpStatus.NO_CONTENT)
             .build()

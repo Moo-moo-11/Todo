@@ -3,14 +3,14 @@ package moomoo.todo.domain.todos.service
 import moomoo.todo.domain.comments.dto.*
 import moomoo.todo.domain.todos.dto.CreateTodoRequest
 import moomoo.todo.domain.todos.dto.TodoResponse
-import moomoo.todo.domain.todos.dto.TodoWithCommentsResponse
+import moomoo.todo.domain.todos.dto.TodoResponseWithCommentList
 import moomoo.todo.domain.todos.dto.UpdateTodoRequest
 
 interface TodoService {
 
-    fun getAllTodoList(sort: String, writer: String?) : List<TodoResponse>
+    fun getAllTodoList() : List<TodoResponse>
 
-    fun getTodoById(todoId: Long) : TodoWithCommentsResponse
+    fun getTodoById(todoId: Long) : TodoResponseWithCommentList
 
     fun createTodo(request: CreateTodoRequest) : TodoResponse
 
@@ -28,6 +28,6 @@ interface TodoService {
 
     fun updateComment(todoId: Long, commentId: Long, request: UpdateCommentRequest) : CommentResponse
 
-    fun deleteComment(todoId: Long, commentId: Long, request: DeleteCommentRequest)
+    fun deleteComment(todoId: Long, commentId: Long)
 
 }

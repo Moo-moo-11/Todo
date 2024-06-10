@@ -5,53 +5,53 @@ import moomoo.todo.domain.comments.model.Comment
 import moomoo.todo.domain.comments.model.toResponse
 import moomoo.todo.domain.comments.repository.CommentRepository
 import moomoo.todo.domain.exception.ModelNotFoundException
-import moomoo.todo.domain.exception.PasswordNotMatchedException
-import moomoo.todo.domain.exception.TodoNotFoundException
-import moomoo.todo.domain.todos.dto.*
+import moomoo.todo.domain.exception.UnauthorizedAccessException
+import moomoo.todo.domain.todos.dto.CreateTodoRequest
+import moomoo.todo.domain.todos.dto.TodoResponse
+import moomoo.todo.domain.todos.dto.TodoResponseWithCommentList
+import moomoo.todo.domain.todos.dto.UpdateTodoRequest
 import moomoo.todo.domain.todos.model.Todo
 import moomoo.todo.domain.todos.model.toResponse
+import moomoo.todo.domain.todos.model.toResponseWithCommentList
 import moomoo.todo.domain.todos.repository.TodoRepository
+import moomoo.todo.domain.users.repository.UserRepository
+import moomoo.todo.infra.security.UserPrincipal
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TodoServiceImpl(
     private val todoRepository: TodoRepository,
-    private val commentRepository: CommentRepository
-): TodoService {
+    private val commentRepository: CommentRepository,
+    private val userRepository: UserRepository
+) : TodoService {
 
-    override fun getAllTodoList(sort: String, writer: String?): List<TodoResponse> {
-
-        return when {
-            (sort == "asc" && writer != null) -> if(!todoRepository.existsTodoByWriter(writer)){
-                throw TodoNotFoundException(writer)
-            } else {
-                todoRepository.findAllByWriterOrderByCreatedAt(writer).map { it.toResponse() }
-            }
-            (sort == "asc") -> todoRepository.findAllByOrderByCreatedAt().map { it.toResponse() }
-            (sort == "desc" && writer != null) ->  if(!todoRepository.existsTodoByWriter(writer)){
-                throw TodoNotFoundException(writer)
-            } else {
-                todoRepository.findAllByWriterOrderByCreatedAtDesc(writer).map { it.toResponse() }
-            }
-            else -> todoRepository.findAllByOrderByCreatedAtDesc().map { it.toResponse() }
-        }
-
+    @Transactional
+    override fun getAllTodoList(): List<TodoResponse> {
+        return todoRepository.findAllByOrderByCreatedAtDesc().map { it.toResponse() }
     }
 
-    override fun getTodoById(todoId: Long): TodoWithCommentsResponse {
+    @Transactional
+    override fun getTodoById(todoId: Long): TodoResponseWithCommentList {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
-        val comments = commentRepository.findAllByTodoIdOrderByCreatedAt(todoId)
 
-        return todo.toResponseWithComment(comments)
+        val commentList = commentRepository.findAllByTodoIdOrderByCreatedAt(todoId)
+
+        return todo.toResponseWithCommentList(commentList)
     }
 
+    @Transactional
     override fun createTodo(request: CreateTodoRequest): TodoResponse {
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
+
+        val user =
+            userRepository.findByIdOrNull(userPrincipal.id) ?: throw ModelNotFoundException("User", userPrincipal.id)
+
         val todo = Todo(
-            title = request.title,
-            writer = request.writer,
-            description = request.description
+            title = request.title, user = user, description = request.description
         )
 
         return todoRepository.save(todo).toResponse()
@@ -61,9 +61,14 @@ class TodoServiceImpl(
     override fun updateTodo(todoId: Long, request: UpdateTodoRequest): TodoResponse {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
 
-        todo.updateTodo(request)
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
 
-        todoRepository.flush()
+        if (userPrincipal.id != todo.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "todo"
+        )
+
+        todo.updateTodo(request.title, request.description)
 
         return todo.toResponse()
     }
@@ -71,6 +76,13 @@ class TodoServiceImpl(
     @Transactional
     override fun deleteTodo(todoId: Long) {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
+
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
+
+        if (userPrincipal.id != todo.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "todo"
+        )
 
         commentRepository.deleteAllByTodoId(todoId)
 
@@ -81,57 +93,83 @@ class TodoServiceImpl(
     override fun toggleTodo(todoId: Long): TodoResponse {
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
 
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
+
+        if (userPrincipal.id != todo.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "todo"
+        )
+
         todo.toggleTodo()
 
         return todo.toResponse()
     }
 
+    @Transactional
     override fun getCommentList(todoId: Long): List<CommentResponse> {
-        if(!todoRepository.existsTodoById(todoId)) throw ModelNotFoundException("Todo", todoId)
+        if (!todoRepository.existsById(todoId)) throw ModelNotFoundException("Todo", todoId)
 
         return commentRepository.findAllByTodoIdOrderByCreatedAt(todoId).map { it.toResponse() }
     }
 
+    @Transactional
     override fun getComment(todoId: Long, commentId: Long): CommentResponse {
-        if(!todoRepository.existsTodoById(todoId)) throw ModelNotFoundException("Todo", todoId)
+        if (!todoRepository.existsById(todoId)) throw ModelNotFoundException("Todo", todoId)
 
-        val comment = commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
+        val comment =
+            commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
 
         return comment.toResponse()
     }
 
     @Transactional
     override fun addComment(todoId: Long, request: CreateCommentRequest): CommentResponse {
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
+
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
 
-        return Comment(
-            writer = request.writer,
-            comment = request.comment,
-            password = request.password,
-            todo = todo
-        ).let { commentRepository.save(it) }.toResponse()
+        val user =
+            userRepository.findByIdOrNull(userPrincipal.id) ?: throw ModelNotFoundException("User", userPrincipal.id)
+
+        val comment = Comment(
+            comment = request.comment, user = user, todo = todo
+        )
+
+        return commentRepository.save(comment).toResponse()
     }
 
     @Transactional
     override fun updateComment(todoId: Long, commentId: Long, request: UpdateCommentRequest): CommentResponse {
-        if(!todoRepository.existsTodoById(todoId)) throw ModelNotFoundException("Todo", todoId)
+        if (!todoRepository.existsById(todoId)) throw ModelNotFoundException("Todo", todoId)
 
-        val comment = commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
+        val comment =
+            commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
 
-        if (!comment.isValidPassword(request.writer, request.password)) throw PasswordNotMatchedException()
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
 
-        comment.updateComment(request)
+        if (userPrincipal.id != comment.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "comment"
+        )
+
+        comment.updateComment(request.comment)
 
         return comment.toResponse()
     }
 
     @Transactional
-    override fun deleteComment(todoId: Long, commentId: Long, request: DeleteCommentRequest) {
-        if(!todoRepository.existsTodoById(todoId)) throw ModelNotFoundException("Todo", todoId)
+    override fun deleteComment(todoId: Long, commentId: Long) {
+        if (!todoRepository.existsById(todoId)) throw ModelNotFoundException("Todo", todoId)
 
-        val comment = commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
+        val comment =
+            commentRepository.findByTodoIdAndId(todoId, commentId) ?: throw ModelNotFoundException("Comment", commentId)
 
-        if (!comment.isValidPassword(request.writer, request.password)) throw PasswordNotMatchedException()
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
+
+        if (userPrincipal.id != comment.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "comment"
+        )
 
         commentRepository.delete(comment)
     }
