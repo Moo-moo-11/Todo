@@ -116,7 +116,7 @@
 
 <strong>ERD</strong>
 
-![Picture](erd_advanced_pic.png)
+![Picture](erd_advanced.png)
 
 <br/>
 
