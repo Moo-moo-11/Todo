@@ -73,7 +73,7 @@
 ## :clipboard: 프로젝트 선택 구현 사항(Step 3-1)에 따라 제작한 Step 3-1
 - advanced-step-3 브랜치에 구현을 완료하였고, 이후에 main에 병합을 진행하였습니다.
 - app_user 테이블과 User 엔티티를 새로 만들어야했습니다. User에는 임베디드 타입을 이용해 주소를 입력할 수 있도록 했습니다.
-- 임베디드 타입은 주소를 입력하지 않아도 되도록 nullable하게 만들어두었지만 모두 다 null을 넣게되면 NPE가 발생하는 문제가 있습니다. ('applicaion.yml' 파일에 spring.jpa.properties.hibernate.create_empty_composites.enabled: true 를 추가해주어야 합니다.)
+- 임베디드 타입은 주소를 입력하지 않아도 되도록 nullable하게 만들어두었지만 모두 다 null을 넣게되면 NPE가 발생하는 문제가 있습니다. (NPE를 없애려면 'applicaion.yml' 파일에 spring.jpa.properties.hibernate.create_empty_composites.enabled: true 를 추가해주어야 합니다.)
 - 로그인을 하지 않은 인증받지 않은 이용자도 Todo와 댓글을 조회할 수 있습니다.
 - 로그인을 한 인증받은 이용자 만이 Todo와 댓글 생성, 수정, 삭제가 가능합니다.
 - 로그인한 이용자 본인의 Todo와 댓글만 수정, 삭제가 가능합니다. 다른 사람의 Todo와 댓글은 수정 및 삭제가 불가능합니다.
