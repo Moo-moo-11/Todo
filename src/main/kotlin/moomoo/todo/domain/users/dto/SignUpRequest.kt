@@ -4,7 +4,7 @@ data class SignUpRequest(
     val userIdentifier: String,
     val name: String,
     val password: String,
-    val zipCode: String?,
+    val zipCode: Int?,
     val streetNameAddress: String?,
     val detailedAddress: String?,
     val role: String

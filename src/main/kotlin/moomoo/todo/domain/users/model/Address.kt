@@ -6,7 +6,7 @@ import jakarta.persistence.Embeddable
 @Embeddable
 class Address(
     @Column(name = "zip_code")
-    var zipCode: String?,
+    var zipCode: Int?,
 
     @Column(name = "street_name_Address")
     var streetNameAddress: String?,

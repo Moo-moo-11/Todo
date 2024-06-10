@@ -17,6 +17,7 @@ import moomoo.todo.domain.todos.repository.TodoRepository
 import moomoo.todo.domain.users.repository.UserRepository
 import moomoo.todo.infra.security.UserPrincipal
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -44,7 +45,10 @@ class TodoServiceImpl(
 
     @Transactional
     override fun createTodo(request: CreateTodoRequest): TodoResponse {
-        val user = userRepository.findByIdOrNull(request.userId) ?: throw ModelNotFoundException("User", request.userId)
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
+
+        val user =
+            userRepository.findByIdOrNull(userPrincipal.id) ?: throw ModelNotFoundException("User", userPrincipal.id)
 
         val todo = Todo(
             title = request.title, user = user, description = request.description
@@ -59,7 +63,10 @@ class TodoServiceImpl(
 
         val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
 
-        if (userPrincipal.id != todo.user.id) throw UnauthorizedAccessException("todo")
+        if (userPrincipal.id != todo.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "todo"
+        )
 
         todo.updateTodo(request.title, request.description)
 
@@ -72,7 +79,10 @@ class TodoServiceImpl(
 
         val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
 
-        if (userPrincipal.id != todo.user.id) throw UnauthorizedAccessException("todo")
+        if (userPrincipal.id != todo.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "todo"
+        )
 
         commentRepository.deleteAllByTodoId(todoId)
 
@@ -85,7 +95,10 @@ class TodoServiceImpl(
 
         val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
 
-        if (userPrincipal.id != todo.user.id) throw UnauthorizedAccessException("todo")
+        if (userPrincipal.id != todo.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "todo"
+        )
 
         todo.toggleTodo()
 
@@ -111,8 +124,12 @@ class TodoServiceImpl(
 
     @Transactional
     override fun addComment(todoId: Long, request: CreateCommentRequest): CommentResponse {
+        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
+
         val todo = todoRepository.findByIdOrNull(todoId) ?: throw ModelNotFoundException("Todo", todoId)
-        val user = userRepository.findByIdOrNull(request.userId) ?: throw ModelNotFoundException("User", request.userId)
+
+        val user =
+            userRepository.findByIdOrNull(userPrincipal.id) ?: throw ModelNotFoundException("User", userPrincipal.id)
 
         val comment = Comment(
             comment = request.comment, user = user, todo = todo
@@ -130,7 +147,10 @@ class TodoServiceImpl(
 
         val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
 
-        if (userPrincipal.id != comment.user.id) throw UnauthorizedAccessException("comment")
+        if (userPrincipal.id != comment.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "comment"
+        )
 
         comment.updateComment(request.comment)
 
@@ -146,7 +166,10 @@ class TodoServiceImpl(
 
         val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
 
-        if (userPrincipal.id != comment.user.id) throw UnauthorizedAccessException("comment")
+        if (userPrincipal.id != comment.user.id &&
+            !userPrincipal.authorities.contains(SimpleGrantedAuthority("ROLE_ADMIN"))) throw UnauthorizedAccessException(
+            "comment"
+        )
 
         commentRepository.delete(comment)
     }

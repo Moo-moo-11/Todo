@@ -24,7 +24,7 @@ class User(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
-    fun updateAddress(zipcode: String?, streetNameAddress: String?, detailedAddress: String?) {
+    fun updateAddress(zipcode: Int?, streetNameAddress: String?, detailedAddress: String?) {
         address = Address(zipcode, streetNameAddress, detailedAddress)
     }
 }

@@ -19,7 +19,7 @@ class Todo(
     @Column(name = "title", nullable = false)
     var title: String,
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = true)
     var description: String?,
 
     @Column (name = "is_completed", nullable = false)
