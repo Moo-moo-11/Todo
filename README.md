@@ -87,7 +87,7 @@
 
 <strong>Use Case Diagram</strong>
 
-![Picture](use_case_diagram_advanced.png)
+![Picture](use_case_diagram_advanced_pic.png)
 
 <br/>
 
